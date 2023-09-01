@@ -19,7 +19,11 @@ if [ -d "$REPO_DIR" ]; then
     if [ -d "$REPO_DIR/$PHOTOS_DIR" ]; then
         echo "Backing up existing photos..."
         TMP_BACKUP_DIR=$(mktemp -d)
-        cp -r "$REPO_DIR/$PHOTOS_DIR"/* "$TMP_BACKUP_DIR/"
+        shopt -s nullglob
+        for file in "$REPO_DIR/$PHOTOS_DIR"/*; do
+            cp "$file" "$TMP_BACKUP_DIR/"
+        done
+        shopt -u nullglob
     fi
     
     echo "Removing existing directory..."
@@ -62,7 +66,7 @@ Description=Microscope Photo Server
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 $REPO_DIR/script.py
+ExecStart=/usr/bin/python3 $REPO_DIR/script.py $REPO_DIR/$PHOTOS_DIR
 Restart=always
 User=$USERNAME
 WorkingDirectory=$REPO_DIR
