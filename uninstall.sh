@@ -38,8 +38,10 @@ if [ -e "/etc/udev/rules.d/40-camera.rules" ]; then
     sudo rm /etc/udev/rules.d/40-camera.rules
 fi
 
-# Revert user to original group and home directory
-sudo usermod -G $USERNAME -d /home/$USERNAME $USERNAME
+# Revert user to original group and home directory if the username is not "root"
+if [ "$USERNAME" != "root" ]; then
+    sudo usermod -G $USERNAME -d /home/$USERNAME $USERNAME
+fi
 
 # Remove installed files if the directory exists
 if [ -d "$INSTALL_DIR" ]; then
