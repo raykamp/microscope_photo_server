@@ -1,0 +1,35 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run",
+            "type": "python",
+            "request": "launch",
+            "program": "script.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["/home/raykamp/Git_Repos/microscope_photo_server/photos"],
+        },
+        {
+            "name": "Install",
+            "type": "pwa-node",
+            "request": "launch",
+            "runtimeExecutable": "/bin/bash",
+            "args": ["./install.sh"],
+            "cwd": "${workspaceFolder}",
+            "protocol": "inspector"
+        },
+        {
+            "name": "Uninstall",
+            "type": "pwa-node",
+            "request": "launch",
+            "runtimeExecutable": "/bin/bash",
+            "args": ["./uninstall.sh"],
+            "cwd": "${workspaceFolder}",
+            "protocol": "inspector"
+        }
+    ]
+}
