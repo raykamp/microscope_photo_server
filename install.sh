@@ -14,8 +14,15 @@ PRODUCT_ID="3218"
 # Automatically detect the username
 USERNAME=$(whoami)
 
+# Check if directory exists and remove it
+if [ -d "$REPO_DIR" ]; then
+    echo "Removing existing directory..."
+    sudo rm -rf $REPO_DIR
+fi
+
 # Clone the repository to a safe location
-sudo git clone $REPO_URL $REPO_DIR
+echo "Cloning repository..."
+sudo git clone $REPO_URL $REPO_DIR  || exit_with_error
 
 # Set the udev rule and permissions
 echo "Setting udev rules..."
@@ -29,7 +36,7 @@ echo "Installing and setting up Samba..."
 sudo apt-get update
 sudo apt-get install samba -y
 echo "[$SHARE_NAME]
-   path = $REPO_DIR/photos
+   path = $REPO_DIR/$PHOTOS_DIR
    read only = no
    guest ok = yes" | sudo tee -a /etc/samba/smb.conf
 sudo systemctl restart smbd
