@@ -14,8 +14,14 @@ PRODUCT_ID="3218"
 # Automatically detect the username
 USERNAME=$(whoami)
 
-# Check if directory exists and remove it
+# Check if directory exists, backup photos and remove it
 if [ -d "$REPO_DIR" ]; then
+    if [ -d "$REPO_DIR/$PHOTOS_DIR" ]; then
+        echo "Backing up existing photos..."
+        TMP_BACKUP_DIR=$(mktemp -d)
+        cp -r "$REPO_DIR/$PHOTOS_DIR"/* "$TMP_BACKUP_DIR/"
+    fi
+    
     echo "Removing existing directory..."
     sudo rm -rf $REPO_DIR
 fi
@@ -23,6 +29,14 @@ fi
 # Clone the repository to a safe location
 echo "Cloning repository..."
 sudo git clone $REPO_URL $REPO_DIR  || exit_with_error
+
+# If there were photos in the old directory, migrate them to the new one
+if [ -d "$TMP_BACKUP_DIR" ]; then
+    echo "Restoring photos to new installation..."
+    mkdir -p "$REPO_DIR/$PHOTOS_DIR"
+    cp -r "$TMP_BACKUP_DIR/"* "$REPO_DIR/$PHOTOS_DIR/"
+    rm -rf "$TMP_BACKUP_DIR"
+fi
 
 # Set the udev rule and permissions
 echo "Setting udev rules..."
