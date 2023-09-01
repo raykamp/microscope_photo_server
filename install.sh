@@ -6,39 +6,51 @@ trap 'echo -e "\033[0;31mError: Command on line $LINENO failed.\033[0m"' ERR
 # Source the configuration file
 source config.cfg
 
-# Parameters
-REPO_URL="https://github.com/raykamp/microscope_photo_server.git"
-VENDOR_ID="04a9"
-PRODUCT_ID="3218"
-
 # Automatically detect the username
 USERNAME=$(whoami)
 
 # Check if directory exists, backup photos and remove it
-if [ -d "$REPO_DIR" ]; then
-    if [ -d "$REPO_DIR/$PHOTOS_DIR" ]; then
+if [ -d "$INSTALL_DIR" ]; then
+    if [ -d "$INSTALL_DIR/$PHOTOS_DIR" ]; then
         echo "Backing up existing photos..."
         TMP_BACKUP_DIR=$(mktemp -d)
         shopt -s nullglob
-        for file in "$REPO_DIR/$PHOTOS_DIR"/*; do
+        for file in "$INSTALL_DIR/$PHOTOS_DIR"/*; do
             cp "$file" "$TMP_BACKUP_DIR/"
         done
         shopt -u nullglob
     fi
     
-    echo "Removing existing directory..."
-    sudo rm -rf $REPO_DIR
+    # Prompt for confirmation
+    read -p "This will uninstall the Microscope Photo Server and delete all associated data. Are you sure you want to proceed? (Y/N): " choice
+    # Convert choice to uppercase
+    choice=$(echo "$choice" | tr '[:lower:]' '[:upper:]')
+
+    if [ "$choice" == "Y" ]; then
+        # Uninstall previous installation
+        echo "Uninstalling previous installation..."
+        sudo ./uninstall.sh
+        echo "Previous installation has been uninstalled."
+    fi
 fi
 
-# Clone the repository to a safe location
-echo "Cloning repository..."
-sudo git clone $REPO_URL $REPO_DIR  || exit_with_error
+# Create the target directory if it doesn't exist
+sudo mkdir -p $INSTALL_DIR
+# Create the photos directory if it doesn't exist
+sudo mkdir -p "$INSTALL_DIR/$PHOTOS_DIR"
+
+# Copy files to installation path
+echo "Copying files to installation path..."
+cp -r ./* "$INSTALL_DIR/"
+
+# Update permissions
+chown -R $USERNAME:$USERNAME $INSTALL_DIR
 
 # If there were photos in the old directory, migrate them to the new one
 if [ -d "$TMP_BACKUP_DIR" ]; then
     echo "Restoring photos to new installation..."
-    mkdir -p "$REPO_DIR/$PHOTOS_DIR"
-    cp -r "$TMP_BACKUP_DIR/"* "$REPO_DIR/$PHOTOS_DIR/"
+    mkdir -p "$INSTALL_DIR/$PHOTOS_DIR"
+    cp -r "$TMP_BACKUP_DIR/"* "$INSTALL_DIR/$PHOTOS_DIR/"
     rm -rf "$TMP_BACKUP_DIR"
 fi
 
@@ -54,7 +66,7 @@ echo "Installing and setting up Samba..."
 sudo apt-get update
 sudo apt-get install samba -y
 echo "[$SHARE_NAME]
-   path = $REPO_DIR/$PHOTOS_DIR
+   path = $INSTALL_DIR/$PHOTOS_DIR
    read only = no
    guest ok = yes" | sudo tee -a /etc/samba/smb.conf
 sudo systemctl restart smbd
@@ -66,10 +78,10 @@ Description=Microscope Photo Server
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 $REPO_DIR/script.py $REPO_DIR/$PHOTOS_DIR
+ExecStart=/usr/bin/python3 $INSTALL_DIR/script.py $INSTALL_DIR/$PHOTOS_DIR
 Restart=always
 User=$USERNAME
-WorkingDirectory=$REPO_DIR
+WorkingDirectory=$INSTALL_DIR
 Environment=PATH=/usr/bin:/usr/local/bin
 
 [Install]
