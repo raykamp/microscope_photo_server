@@ -12,13 +12,17 @@ USERNAME=$(whoami)
 # Check if directory exists, backup photos and remove it
 if [ -d "$INSTALL_DIR" ]; then
     if [ -d "$INSTALL_DIR/$PHOTOS_DIR" ]; then
-        echo "Backing up existing photos..."
-        TMP_BACKUP_DIR=$(mktemp -d)
         shopt -s nullglob
-        for file in "$INSTALL_DIR/$PHOTOS_DIR"/*; do
-            cp "$file" "$TMP_BACKUP_DIR/"
-        done
+        photo_files=("$INSTALL_DIR/$PHOTOS_DIR"/*)
         shopt -u nullglob
+        
+        if [ ${#photo_files[@]} -gt 0 ]; then
+            echo "Backing up existing photos..."
+            TMP_BACKUP_DIR=$(mktemp -d)
+            for file in "${photo_files[@]}"; do
+                cp "$file" "$TMP_BACKUP_DIR/"
+            done
+        fi
     fi
     
     # Prompt for confirmation
