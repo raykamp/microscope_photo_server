@@ -1,10 +1,13 @@
 #!/bin/bash
 
+set -e
+trap 'echo -e "\033[0;31mError: Command on line $LINENO failed.\033[0m"' ERR
+
 # Source the configuration file
 source config.cfg
 
 # Parameters
-REPO_URL="git@github.com:raykamp/microscope_photo_server.git"
+REPO_URL="https://github.com/raykamp/microscope_photo_server.git"
 VENDOR_ID="04a9"
 PRODUCT_ID="3218"
 
@@ -54,4 +57,3 @@ sudo systemctl enable microscope-photo-server
 sudo systemctl start microscope-photo-server
 
 echo "Installation complete!"
-
