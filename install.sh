@@ -6,9 +6,6 @@ trap 'echo -e "\033[0;31mError: Command on line $LINENO failed.\033[0m"' ERR
 # Source the configuration file
 source config.cfg
 
-# Install gphoto2 using the --user flag
-pip install gphoto2 --user --no-warn-script-location
-
 # Check if directory exists, backup photos and remove it
 if [ -d "$INSTALL_DIR" ]; then
     if [ -d "$INSTALL_DIR/$PHOTOS_DIR" ]; then
@@ -64,6 +61,13 @@ echo "ATTR{idVendor}==\"$VENDOR_ID\", ATTR{idProduct}==\"$PRODUCT_ID\", MODE=\"0
 sudo usermod -aG plugdev $USERNAME
 sudo udevadm control --reload-rules
 sudo udevadm trigger
+
+# Install libgphoto2-6
+sudo apt-get update
+sudo apt-get install libgphoto2-6 -y
+
+# Install gphoto2 python bindings using the --user flag
+sudo -H pip install gphoto2
 
 # Install and configure the Samba server
 echo "Installing and setting up Samba..."
