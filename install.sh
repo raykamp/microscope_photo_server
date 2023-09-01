@@ -6,8 +6,8 @@ trap 'echo -e "\033[0;31mError: Command on line $LINENO failed.\033[0m"' ERR
 # Source the configuration file
 source config.cfg
 
-# Automatically detect the username
-USERNAME=$(whoami)
+# Install gphoto2 using the --user flag
+pip install gphoto2 --user --no-warn-script-location
 
 # Check if directory exists, backup photos and remove it
 if [ -d "$INSTALL_DIR" ]; then

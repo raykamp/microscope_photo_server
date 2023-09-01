@@ -6,9 +6,6 @@ trap 'echo -e "\033[0;31mError: Command on line $LINENO failed.\033[0m"' ERR
 # Source the configuration file
 source config.cfg
 
-# Automatically detect the username
-USERNAME=$(whoami)
-
 # Check if the service is active and running
 if sudo systemctl is-active --quiet microscope-photo-server; then
     # Stop and disable the service
