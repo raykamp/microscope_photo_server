@@ -33,11 +33,17 @@ fi
 sudo sed -i "/\[$SHARE_NAME\]/,/^$/d" /etc/samba/smb.conf
 sudo systemctl restart smbd
 
-# Remove the udev rule
-sudo rm /etc/udev/rules.d/40-camera.rules
-sudo usermod -G $USERNAME -d /home/$USERNAME $USERNAME  # Revert user to original group and home directory
+# Remove the udev rule if it exists
+if [ -e "/etc/udev/rules.d/40-camera.rules" ]; then
+    sudo rm /etc/udev/rules.d/40-camera.rules
+fi
 
-# Remove installed files
-sudo rm -rf $INSTALL_DIR
+# Revert user to original group and home directory
+sudo usermod -G $USERNAME -d /home/$USERNAME $USERNAME
+
+# Remove installed files if the directory exists
+if [ -d "$INSTALL_DIR" ]; then
+    sudo rm -rf $INSTALL_DIR
+fi
 
 echo "Uninstallation complete!"
