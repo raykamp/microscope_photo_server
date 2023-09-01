@@ -19,10 +19,9 @@ def download_and_delete_file(camera, path, target_directory):
     camera.file_delete(folder, name)
 
 def tether_and_monitor_photos(target_directory):
-    # Ensure the directory exists
+    # Create the directory if it doesn't exist
     if not os.path.exists(target_directory):
-        print(f"Directory '{target_directory}' does not exist. Please provide a valid directory.")
-        sys.exit(1)
+        os.makedirs(target_directory)
 
     # Create the camera object
     camera = gp.Camera()
@@ -30,11 +29,14 @@ def tether_and_monitor_photos(target_directory):
 
     print("Monitoring for new photos... (Press Ctrl+C to stop)")
 
-    while True:
-        # Use timeout for 3000ms or 3s. Adjust as needed.
-        event_type, event_data = camera.wait_for_event(3000)
-        if event_type == gp.GP_EVENT_FILE_ADDED:
-            download_and_delete_file(camera, event_data.folder + event_data.name, target_directory)
+    try:
+        while True:
+            # Use timeout for 3000ms or 3s. Adjust as needed.
+            event_type, event_data = camera.wait_for_event(3000)
+            if event_type == gp.GP_EVENT_FILE_ADDED:
+                download_and_delete_file(camera, event_data.folder + event_data.name, target_directory)
+    except KeyboardInterrupt:
+        pass
 
     camera.exit()
 
