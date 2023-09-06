@@ -6,10 +6,15 @@ import sys
 import datetime
 import uuid
 import re
+import configparser
 
-MEDIA_DIRS_ON_CAMERA_REGEX = "store_0002000\d\/DCIM\/\d{3}CANON"
-MEDIA_FILETYPES_SUPPORTED = ['.jpg', '.jpeg', '.png', '.raw', '.tif', '.mp4', '.mov', '.avi', '.mkv']
+# Create a config parser and read the config file
+config = configparser.ConfigParser()
+config.read('config.cfg')
 
+# Read parameters from the config file
+MEDIA_DIRS_ON_CAMERA_REGEX = config.get('CameraConfig', 'MEDIA_DIRS_ON_CAMERA_REGEX')
+MEDIA_FILETYPES_SUPPORTED =  [filetype.strip() for filetype in config.get('CameraConfig', 'MEDIA_FILETYPES_SUPPORTED').split(',')]
 
 def download_and_delete_file(camera, path, target_directory):
     folder, name = os.path.split(path)

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Automatically detect the username
+if [ -n "$SUDO_USER" ]; then
+    USERNAME="$SUDO_USER"
+else
+    USERNAME=$(whoami)
+fi
+
 # Check if script is not running as root
 if [ "$EUID" -ne 0 ]; then
     # Prompt the user for confirmation

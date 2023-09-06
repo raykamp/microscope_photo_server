@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Automatically detect the username
+if [ -n "$SUDO_USER" ]; then
+    USERNAME="$SUDO_USER"
+else
+    USERNAME=$(whoami)
+fi
+
 set -e
 trap 'echo -e "\033[0;31mError: Command on line $LINENO failed.\033[0m"' ERR
 
