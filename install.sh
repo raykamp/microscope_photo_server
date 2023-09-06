@@ -39,6 +39,8 @@ fi
 sudo mkdir -p $INSTALL_DIR
 # Create the photos directory if it doesn't exist
 sudo mkdir -p "$INSTALL_DIR/$PHOTOS_DIR"
+# Grant RW permissions for all users on the photos directory
+sudo chmod 775 "$INSTALL_DIR/$PHOTOS_DIR"
 
 # Copy files to installation path
 echo "Copying files to installation path..."
@@ -92,6 +94,7 @@ After=network.target
 [Service]
 ExecStart=/usr/bin/python3 $INSTALL_DIR/script.py $INSTALL_DIR/$PHOTOS_DIR
 Restart=always
+RestartSec=5min
 User=$USERNAME
 WorkingDirectory=$INSTALL_DIR
 Environment=PATH=/usr/bin:/usr/local/bin

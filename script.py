@@ -9,10 +9,12 @@ import sys
 
 def download_and_delete_file(camera, path, target_directory):
     folder, name = os.path.split(path)
+    output_path = os.path.join(target_directory, name)
     print(f"Downloading {path} to {target_directory}")
     
     camera_file = camera.file_get(folder, name, gp.GP_FILE_TYPE_NORMAL)
-    camera_file.save(os.path.join(target_directory, name))
+    camera_file.save(output_path)
+    os.chmod(output_path, 0o666)
     
     # Delete file after download
     print(f"Deleting {name} from camera...")
