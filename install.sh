@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Check if the script is running as root
+if [ "$EUID" -ne 0 ]; then
+  echo "Script requires root privileges. Escalating..."
+  sudo "$0" "$@"
+  exit $?
+fi
+
+# rest of your script starts here
+echo "Running with root privileges."
+
 # Function to be called in case of error
 handle_error() {
     echo -e "\033[0;31mError: Command on line $LINENO failed.\033[0m"
