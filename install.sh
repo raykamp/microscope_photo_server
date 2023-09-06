@@ -16,7 +16,7 @@ handle_error() {
         sudo chmod 775 "$INSTALL_DIR/$PHOTOS_DIR"
         
         # Restore the photos
-        cp -r "$TMP_BACKUP_DIR/"* "$INSTALL_DIR/$PHOTOS_DIR/"
+        sudo cp -r "$TMP_BACKUP_DIR/"* "$INSTALL_DIR/$PHOTOS_DIR/"
         rm -rf "$TMP_BACKUP_DIR"
     fi
     
