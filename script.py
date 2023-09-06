@@ -5,8 +5,9 @@ import os
 import sys
 import datetime
 import uuid
+import re
 
-MEDIA_DIR_ON_CAEMRA = "/DCIM/100CANON"
+MEDIA_DIRS_ON_CAMERA_REGEX = "store_0002000\d\/DCIM\/\d{3}CANON"
 MEDIA_FILETYPES_SUPPORTED = ['.jpg', '.jpeg', '.png', '.raw', '.tif', '.mp4', '.mov', '.avi', '.mkv']
 
 
@@ -36,18 +37,23 @@ def download_and_delete_file(camera, path, target_directory):
     camera.file_delete(folder, name)
 
 def download_all_existing_files(camera, target_directory):
-    # Define folder where photos are stored
-    photo_folder = MEDIA_DIR_ON_CAEMRA
+    # Define the regular expression pattern for matching folders
+    pattern = re.compile(MEDIA_DIRS_ON_CAMERA_REGEX, re.IGNORECASE)
+
     # File extensions considered as photos
     photo_extensions = [ext.lower() for ext in MEDIA_FILETYPES_SUPPORTED] 
 
-    # Fetch and download all photo files from the specified folder
-    for file in camera.folder_list_files(photo_folder):
-        _, ext = os.path.splitext(file)
-        if ext.lower() in photo_extensions:
-            download_and_delete_file(camera, os.path.join(photo_folder, file), target_directory)
-
-
+    # Fetch and check folders in the base directory
+    all_folders = camera.folder_list_folders("/")
+    matching_folders = [folder for folder in all_folders if pattern.match(folder)]
+    
+    # For each matching folder, fetch and download files
+    for folder in matching_folders:
+        folder_path = os.path.join("/", folder)
+        for file in camera.folder_list_files(folder_path):
+            _, ext = os.path.splitext(file)
+            if ext.lower() in photo_extensions:
+                download_and_delete_file(camera, os.path.join(folder_path, file), target_directory)
 
 def tether_and_monitor_photos(target_directory):
    # Create the directory if it doesn't exist
