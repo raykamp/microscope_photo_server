@@ -13,10 +13,17 @@ MEDIA_FILETYPES_SUPPORTED = ['.jpg', '.jpeg', '.png', '.raw', '.tif', '.mp4', '.
 def download_and_delete_file(camera, path, target_directory):
     folder, name = os.path.split(path)
     
-    # Create unique filename using current date-time and a random string
+    # Fetch the file info which contains the timestamp
+    info = camera.file_get_info(folder, name)
+    timestamp = info.file.mtime
+
+    # Convert the timestamp to a datetime object
+    dt = datetime.datetime.fromtimestamp(timestamp)
+
+    # Create unique filename using the photo's date-time and a random string
     file_extension = os.path.splitext(name)[1]  # get the file extension (e.g., .jpg)
-    unique_name = datetime.datetime.now().strftime("photo_%Y-%m-%d_%H-%M-%S_") + str(uuid.uuid4().hex)[:6] + file_extension
-    
+    unique_name = dt.strftime("photo_%Y-%m-%d_%H-%M-%S_") + str(uuid.uuid4().hex)[:6] + file_extension
+
     output_path = os.path.join(target_directory, unique_name)
     print(f"Downloading {path} to {target_directory}")
     
