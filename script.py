@@ -6,6 +6,7 @@ import sys
 import datetime
 import uuid
 import re
+import time
 import configparser
 
 # Create a config parser and read the config file
@@ -68,27 +69,38 @@ def tether_and_monitor_photos(target_directory):
     if not os.path.exists(target_directory):
         os.makedirs(target_directory)
 
-    # Create the camera object
-    camera = gp.Camera()
-    camera.init()
+    print("Attempting to connect to camera...")
 
-    # Download all existing files upon first connection
-    download_all_existing_files(camera, target_directory)
+    while True:
+        try:
+            # Create the camera object
+            camera = gp.Camera()
+            camera.init()
 
-    print("Monitoring for new photos and videos... (Press Ctrl+C to stop)")
+            # Download all existing files upon first connection
+            download_all_existing_files(camera, target_directory)
 
-    try:
-        while True:
-            # Use timeout for 3000ms or 3s. Adjust as needed.
-            event_type, event_data = camera.wait_for_event(3000)
-            if event_type == gp.GP_EVENT_FILE_ADDED:
-                download_and_delete_file(camera, event_data.folder + event_data.name, target_directory)
-                # Double-check for any remaining media files
-                download_all_existing_files(camera, target_directory)
-    except KeyboardInterrupt:
-        pass
+            print("Monitoring for new photos and videos... (Press Ctrl+C to stop)")
 
-    camera.exit()
+            while True:
+                # Use timeout for 3000ms or 3s. Adjust as needed.
+                event_type, event_data = camera.wait_for_event(3000)
+                if event_type == gp.GP_EVENT_FILE_ADDED:
+                    download_and_delete_file(camera, event_data.folder + event_data.name, target_directory)
+                    # Double-check for any remaining media files
+                    download_all_existing_files(camera, target_directory)
+        except KeyboardInterrupt:
+            print("\nExiting program...")
+            camera.exit()
+            break
+        except gp.GPhoto2Error as ex:
+            print(f"Error: {str(ex)}. Attempting to reconnect in 5 seconds...")
+            try:
+                camera.exit()
+            except:
+                pass
+            time.sleep(5)
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
