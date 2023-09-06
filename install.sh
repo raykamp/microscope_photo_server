@@ -43,7 +43,7 @@ handle_error() {
         
         # Create the photos directory
         sudo mkdir -p "$INSTALL_DIR/$PHOTOS_DIR"
-        sudo chmod 775 "$INSTALL_DIR/$PHOTOS_DIR"
+        sudo chmod 776 "$INSTALL_DIR/$PHOTOS_DIR"
         
         # Restore the photos
         sudo cp -r "$TMP_BACKUP_DIR/"* "$INSTALL_DIR/$PHOTOS_DIR/"
