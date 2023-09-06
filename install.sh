@@ -1,10 +1,19 @@
 #!/bin/bash
 
-# Check if the script is running as root
+# Check if script is not running as root
 if [ "$EUID" -ne 0 ]; then
-  echo "Script requires root privileges. Escalating..."
-  sudo "$0" "$@"
-  exit $?
+    # Prompt the user for confirmation
+    read -p "This script needs to run with root privileges. Do you want to continue? (y/n) " choice
+    choice=$(echo "$choice" | tr '[:lower:]' '[:upper:]')  # Convert the input to uppercase
+
+    # Check if the choice is "Y"
+    if [ "$choice" != "Y" ]; then
+        echo "Exiting script."
+        exit 1
+    fi
+
+    # Re-run the script with sudo
+    exec sudo "$0" "$@"
 fi
 
 # rest of your script starts here
