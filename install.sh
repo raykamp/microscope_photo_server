@@ -136,7 +136,7 @@ After=network.target
 [Service]
 ExecStart=/usr/bin/python3 $INSTALL_DIR/script.py $INSTALL_DIR/$PHOTOS_DIR
 Restart=always
-RestartSec=5min
+RestartSec=1min
 User=$USERNAME
 WorkingDirectory=$INSTALL_DIR
 Environment=PATH=/usr/bin:/usr/local/bin
