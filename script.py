@@ -14,14 +14,14 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 # Read parameters from the config file
-MEDIA_DIRS_ON_CAMERA_REGEX = config.get('CameraConfig', 'MEDIA_DIRS_ON_CAMERA_REGEX')
-MEDIA_FILETYPES_SUPPORTED =  [filetype.strip() for filetype in config.get('CameraConfig', 'MEDIA_FILETYPES_SUPPORTED').split(',')]
+MEDIA_DIRS_ON_CAMERA_REGEX = config.get('CameraConfig', 'MEDIA_DIRS_ON_CAMERA_REGEX').replace('"', '')
+MEDIA_FILETYPES_SUPPORTED =  [filetype.strip() for filetype in config.get('CameraConfig', 'MEDIA_FILETYPES_SUPPORTED').replace('"', '').split(',')]
 
 def download_and_delete_file(camera, path, target_directory):
-    folder, name = os.path.split(path)
+    dir, name = os.path.split(path)
     
     # Fetch the file info which contains the timestamp
-    info = camera.file_get_info(folder, name)
+    info = camera.file_get_info(dir, name)
     timestamp = info.file.mtime
 
     # Convert the timestamp to a datetime object
@@ -34,13 +34,29 @@ def download_and_delete_file(camera, path, target_directory):
     output_path = os.path.join(target_directory, unique_name)
     print(f"Downloading {path} to {target_directory}")
     
-    camera_file = camera.file_get(folder, name, gp.GP_FILE_TYPE_NORMAL)
+    camera_file = camera.file_get(dir, name, gp.GP_FILE_TYPE_NORMAL)
     camera_file.save(output_path)
     os.chmod(output_path, 0o666)
     
     # Delete file after download
     print(f"Deleting {name} from camera...")
-    camera.file_delete(folder, name)
+    camera.file_delete(dir, name)
+
+def get_all_directories_on_camera(camera, directory_path="/"):
+    """Get all directories recursively from the specified path."""
+    directories = []
+    
+    # List directories in the current directory_path
+    directory_names = [name for name, _ in camera.folder_list_folders(directory_path)]
+
+    for directory in directory_names:
+        current_path = os.path.join(directory_path, directory)
+        directories.append(current_path)
+
+        # Recursively add sub-directories
+        directories.extend(get_all_directories_on_camera(camera, current_path))
+    
+    return directories
 
 def download_all_existing_files(camera, target_directory):
     # Define the regular expression pattern for matching folders
@@ -50,18 +66,18 @@ def download_all_existing_files(camera, target_directory):
     photo_extensions = [ext.lower() for ext in MEDIA_FILETYPES_SUPPORTED] 
 
     # Fetch and check folders in the base directory
-    folder_names = [name for name, _ in camera.folder_list_folders("/")]
+    camera_dirs = get_all_directories_on_camera(camera)
 
     # Filter folders based on the pattern
-    matching_folders = [folder for folder in folder_names if pattern.match(folder)]
+    matching_dirs = [dir for dir in camera_dirs if pattern.match(dir)]
     
     # For each matching folder, fetch and download files
-    for folder in matching_folders:
-        folder_path = os.path.join("/", folder)
-        for file in camera.folder_list_files(folder_path):
+    for dir in matching_dirs:
+        dir_path = os.path.join("/", dir)
+        for file, _ in camera.folder_list_files(dir_path):
             _, ext = os.path.splitext(file)
             if ext.lower() in photo_extensions:
-                download_and_delete_file(camera, os.path.join(folder_path, file), target_directory)
+                download_and_delete_file(camera, os.path.join(dir_path, file), target_directory)
 
 
 def tether_and_monitor_photos(target_directory):
