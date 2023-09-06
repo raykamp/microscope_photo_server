@@ -88,9 +88,6 @@ sudo chmod 775 "$INSTALL_DIR/$PHOTOS_DIR"
 echo "Copying files to installation path..."
 cp -r ./* "$INSTALL_DIR/"
 
-# Update permissions
-chown -R $USERNAME:$USERNAME $INSTALL_DIR
-
 # If there were photos in the old directory, migrate them to the new one
 if [ -d "$TMP_BACKUP_DIR" ]; then
     echo "Restoring photos to new installation..."
@@ -98,6 +95,9 @@ if [ -d "$TMP_BACKUP_DIR" ]; then
     cp -r "$TMP_BACKUP_DIR/"* "$INSTALL_DIR/$PHOTOS_DIR/"
     rm -rf "$TMP_BACKUP_DIR"
 fi
+
+# Update permissions
+chown -R $USERNAME:$USERNAME $INSTALL_DIR
 
 # Set the udev rule and permissions
 echo "Setting udev rules..."
