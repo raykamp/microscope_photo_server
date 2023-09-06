@@ -64,6 +64,7 @@ if [ -d "$INSTALL_DIR" ]; then
         shopt -u nullglob
         
         if [ ${#photo_files[@]} -gt 0 ]; then
+            echo "A previous installation has been detected."
             echo "Backing up existing photos..."
             TMP_BACKUP_DIR=$(mktemp -d)
             for file in "${photo_files[@]}"; do
@@ -73,7 +74,7 @@ if [ -d "$INSTALL_DIR" ]; then
     fi
     
     # Prompt for confirmation
-    read -p "This will uninstall the Microscope Photo Server and delete all associated data. Are you sure you want to proceed? (Y/N): " choice
+    read -p "The previous installation will be uninstalled and all associated data deleted. Are you sure you want to proceed? (Y/N): " choice
     # Convert choice to uppercase
     choice=$(echo "$choice" | tr '[:lower:]' '[:upper:]')
 
