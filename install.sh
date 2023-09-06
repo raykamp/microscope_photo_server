@@ -74,9 +74,13 @@ echo "Installing and setting up Samba..."
 sudo apt-get update
 sudo apt-get install samba -y
 echo "[$SHARE_NAME]
-   path = $INSTALL_DIR/$PHOTOS_DIR
-   read only = no
-   guest ok = yes" | sudo tee -a /etc/samba/smb.conf
+    path = $INSTALL_DIR/$PHOTOS_DIR
+    read only = no
+    create mask = 0755
+    directory mask = 0755
+    guest ok = yes
+    writable = yes
+    delete readonly = yes" | sudo tee -a /etc/samba/smb.conf
 sudo systemctl restart smbd
 
 # Create a systemd service to run the script on startup
