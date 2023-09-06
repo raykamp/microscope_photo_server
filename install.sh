@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Source the configuration file
+source config.cfg
+
 # Automatically detect the username
 if [ -n "$SUDO_USER" ]; then
     USERNAME="$SUDO_USER"
@@ -51,9 +54,6 @@ handle_error() {
 
 # Set trap to handle errors
 trap handle_error ERR
-
-# Source the configuration file
-source config.cfg
 
 # Check if directory exists, backup photos and remove it
 if [ -d "$INSTALL_DIR" ]; then
