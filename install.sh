@@ -3,6 +3,7 @@
 # Source the config parser module
 source config_parser.sh
 
+PHOTO_DIR_PERMISSIONS=777
 
 # Automatically detect the username
 if [ -n "$SUDO_USER" ]; then
@@ -43,7 +44,7 @@ handle_error() {
         
         # Create the photos directory
         sudo mkdir -p "$INSTALL_DIR/$PHOTOS_DIR"
-        sudo chmod 776 "$INSTALL_DIR/$PHOTOS_DIR"
+        sudo chmod "$PHOTO_DIR_PERMISSIONS" "$INSTALL_DIR/$PHOTOS_DIR"
         
         # Restore the photos
         sudo cp -r "$TMP_BACKUP_DIR/"* "$INSTALL_DIR/$PHOTOS_DIR/"
@@ -91,7 +92,7 @@ sudo mkdir -p $INSTALL_DIR
 # Create the photos directory if it doesn't exist
 sudo mkdir -p "$INSTALL_DIR/$PHOTOS_DIR"
 # Grant RW permissions for all users on the photos directory
-sudo chmod 775 "$INSTALL_DIR/$PHOTOS_DIR"
+sudo chmod "$PHOTO_DIR_PERMISSIONS" "$INSTALL_DIR/$PHOTOS_DIR"
 
 # Copy files to installation path
 echo "Copying files to installation path..."
