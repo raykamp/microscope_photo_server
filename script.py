@@ -10,7 +10,7 @@ import configparser
 
 # Create a config parser and read the config file
 config = configparser.ConfigParser()
-config.read('config.cfg')
+config.read('config.ini')
 
 # Read parameters from the config file
 MEDIA_DIRS_ON_CAMERA_REGEX = config.get('CameraConfig', 'MEDIA_DIRS_ON_CAMERA_REGEX')
