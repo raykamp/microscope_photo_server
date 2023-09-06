@@ -10,20 +10,20 @@ fi
 set -e
 trap 'echo -e "\033[0;31mError: Command on line $LINENO failed.\033[0m"' ERR
 
-# Source the configuration file
-source config.cfg
+# Source the config parser module
+source config_parser.sh
 
 # Check if the service is active and running
-if sudo systemctl is-active --quiet microscope-photo-server; then
+if sudo systemctl is-active --quiet $SYSTEMD_SERVICE_NAME; then
     # Stop and disable the service
-    sudo systemctl stop microscope-photo-server
-    sudo systemctl disable microscope-photo-server
+    sudo systemctl stop $SYSTEMD_SERVICE_NAME
+    sudo systemctl disable $SYSTEMD_SERVICE_NAME
 fi
 
 # Check if the service file exists
-if [ -e "/etc/systemd/system/microscope-photo-server.service" ]; then
+if [ -e "/etc/systemd/system/$SYSTEMD_SERVICE_NAME.service" ]; then
     # Remove the systemd service file
-    sudo rm /etc/systemd/system/microscope-photo-server.service
+    sudo rm /etc/systemd/system/$SYSTEMD_SERVICE_NAME.service
 
     # Reload systemd units
     sudo systemctl daemon-reload
@@ -34,7 +34,7 @@ else
 fi
 
 # Remove the Samba configuration
-sudo sed -i "/\[$SHARE_NAME\]/,/^$/d" /etc/samba/smb.conf
+sudo sed -i "/\[$SERVER_SHARE_NAME\]/,/^$/d" /etc/samba/smb.conf
 sudo systemctl restart smbd
 
 # Remove the udev rule if it exists

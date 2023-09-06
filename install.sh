@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Source the configuration file
-source config.cfg
+# Source the config parser module
+source config_parser.sh
+
 
 # Automatically detect the username
 if [ -n "$SUDO_USER" ]; then
@@ -108,7 +109,7 @@ chown -R $USERNAME:$USERNAME $INSTALL_DIR
 
 # Set the udev rule and permissions
 echo "Setting udev rules..."
-echo "ATTR{idVendor}==\"$VENDOR_ID\", ATTR{idProduct}==\"$PRODUCT_ID\", MODE=\"0660\", GROUP=\"plugdev\"" | sudo tee /etc/udev/rules.d/40-camera.rules
+echo "ATTR{idVendor}==\"$CAMERACONFIG_VENDOR_ID\", ATTR{idProduct}==\"$CAMERACONFIG_PRODUCT_ID\", MODE=\"0660\", GROUP=\"plugdev\"" | sudo tee /etc/udev/rules.d/40-camera.rules
 sudo usermod -aG plugdev $USERNAME
 sudo udevadm control --reload-rules
 sudo udevadm trigger
@@ -124,7 +125,7 @@ sudo -H pip install gphoto2
 echo "Installing and setting up Samba..."
 sudo apt-get update
 sudo apt-get install samba -y
-echo "[$SHARE_NAME]
+echo "[$SERVER_SHARE_NAME]
     path = $INSTALL_DIR/$PHOTOS_DIR
     read only = no
     create mask = 0755
@@ -151,10 +152,10 @@ Environment=PATH=/usr/bin:/usr/local/bin
 [Install]
 WantedBy=multi-user.target"
 
-echo "$SERVICE_CONTENT" | sudo tee /etc/systemd/system/microscope-photo-server.service
+echo "$SERVICE_CONTENT" | sudo tee /etc/systemd/system/$SYSTEMD_SERVICE_NAME.service
 
 sudo systemctl daemon-reload
-sudo systemctl enable microscope-photo-server
-sudo systemctl start microscope-photo-server
+sudo systemctl enable $SYSTEMD_SERVICE_NAME
+sudo systemctl start $SYSTEMD_SERVICE_NAME
 
 echo "Installation complete!"
