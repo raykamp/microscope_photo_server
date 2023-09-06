@@ -49,8 +49,10 @@ def download_all_existing_files(camera, target_directory):
     photo_extensions = [ext.lower() for ext in MEDIA_FILETYPES_SUPPORTED] 
 
     # Fetch and check folders in the base directory
-    all_folders = camera.folder_list_folders("/")
-    matching_folders = [folder for folder in all_folders if pattern.match(folder)]
+    folder_names = [name for name, _ in camera.folder_list_folders("/")]
+
+    # Filter folders based on the pattern
+    matching_folders = [folder for folder in folder_names if pattern.match(folder)]
     
     # For each matching folder, fetch and download files
     for folder in matching_folders:
@@ -59,6 +61,7 @@ def download_all_existing_files(camera, target_directory):
             _, ext = os.path.splitext(file)
             if ext.lower() in photo_extensions:
                 download_and_delete_file(camera, os.path.join(folder_path, file), target_directory)
+
 
 def tether_and_monitor_photos(target_directory):
    # Create the directory if it doesn't exist
