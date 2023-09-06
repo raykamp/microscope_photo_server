@@ -6,6 +6,10 @@ import sys
 import datetime
 import uuid
 
+MEDIA_DIR_ON_CAEMRA = "/DCIM/100CANON"
+MEDIA_FILETYPES_SUPPORTED = ['.jpg', '.jpeg', '.png', '.raw', '.tif', '.mp4', '.mov', '.avi', '.mkv']
+
+
 def download_and_delete_file(camera, path, target_directory):
     folder, name = os.path.split(path)
     
@@ -24,8 +28,22 @@ def download_and_delete_file(camera, path, target_directory):
     print(f"Deleting {name} from camera...")
     camera.file_delete(folder, name)
 
+def download_all_existing_files(camera, target_directory):
+    # Define folder where photos are stored
+    photo_folder = MEDIA_DIR_ON_CAEMRA
+    # File extensions considered as photos
+    photo_extensions = [ext.lower() for ext in MEDIA_FILETYPES_SUPPORTED] 
+
+    # Fetch and download all photo files from the specified folder
+    for file in camera.folder_list_files(photo_folder):
+        _, ext = os.path.splitext(file)
+        if ext.lower() in photo_extensions:
+            download_and_delete_file(camera, os.path.join(photo_folder, file), target_directory)
+
+
+
 def tether_and_monitor_photos(target_directory):
-    # Create the directory if it doesn't exist
+   # Create the directory if it doesn't exist
     if not os.path.exists(target_directory):
         os.makedirs(target_directory)
 
@@ -33,7 +51,10 @@ def tether_and_monitor_photos(target_directory):
     camera = gp.Camera()
     camera.init()
 
-    print("Monitoring for new photos... (Press Ctrl+C to stop)")
+    # Download all existing files upon first connection
+    download_all_existing_files(camera, target_directory)
+
+    print("Monitoring for new photos and videos... (Press Ctrl+C to stop)")
 
     try:
         while True:
@@ -41,6 +62,8 @@ def tether_and_monitor_photos(target_directory):
             event_type, event_data = camera.wait_for_event(3000)
             if event_type == gp.GP_EVENT_FILE_ADDED:
                 download_and_delete_file(camera, event_data.folder + event_data.name, target_directory)
+                # Double-check for any remaining media files
+                download_all_existing_files(camera, target_directory)
     except KeyboardInterrupt:
         pass
 
