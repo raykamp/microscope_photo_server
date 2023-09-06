@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 
-# TODO: Install script
-# TODO: Install udev rule for permission to access camera as non-admin (04a9:3218)
-
 import gphoto2 as gp
 import os
 import sys
+import datetime
+import uuid
 
 def download_and_delete_file(camera, path, target_directory):
     folder, name = os.path.split(path)
-    output_path = os.path.join(target_directory, name)
+    
+    # Create unique filename using current date-time and a random string
+    file_extension = os.path.splitext(name)[1]  # get the file extension (e.g., .jpg)
+    unique_name = datetime.datetime.now().strftime("photo_%Y-%m-%d_%H-%M-%S_") + str(uuid.uuid4().hex)[:6] + file_extension
+    
+    output_path = os.path.join(target_directory, unique_name)
     print(f"Downloading {path} to {target_directory}")
     
     camera_file = camera.file_get(folder, name, gp.GP_FILE_TYPE_NORMAL)
