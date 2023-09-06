@@ -1,7 +1,30 @@
 #!/bin/bash
 
-set -e
-trap 'echo -e "\033[0;31mError: Command on line $LINENO failed.\033[0m"' ERR
+# Function to be called in case of error
+handle_error() {
+    echo -e "\033[0;31mError: Command on line $LINENO failed.\033[0m"
+    
+    # If there were photos in the temporary backup directory, recreate the install directory and restore them
+    if [ -d "$TMP_BACKUP_DIR" ]; then
+        echo "Error encountered. Restoring photos for potential re-attempt..."
+        
+        # Create the target directory
+        sudo mkdir -p $INSTALL_DIR
+        
+        # Create the photos directory
+        sudo mkdir -p "$INSTALL_DIR/$PHOTOS_DIR"
+        sudo chmod 775 "$INSTALL_DIR/$PHOTOS_DIR"
+        
+        # Restore the photos
+        cp -r "$TMP_BACKUP_DIR/"* "$INSTALL_DIR/$PHOTOS_DIR/"
+        rm -rf "$TMP_BACKUP_DIR"
+    fi
+    
+    exit 1
+}
+
+# Set trap to handle errors
+trap handle_error ERR
 
 # Source the configuration file
 source config.cfg
