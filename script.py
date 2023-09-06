@@ -13,8 +13,8 @@ config = configparser.ConfigParser()
 config.read('config.cfg')
 
 # Read parameters from the config file
-MEDIA_DIRS_ON_CAMERA_REGEX = config.get('General', 'MEDIA_DIRS_ON_CAMERA_REGEX')
-MEDIA_FILETYPES_SUPPORTED =  [filetype.strip() for filetype in config.get('General', 'MEDIA_FILETYPES_SUPPORTED').split(',')]
+MEDIA_DIRS_ON_CAMERA_REGEX = config.get('CameraConfig', 'MEDIA_DIRS_ON_CAMERA_REGEX')
+MEDIA_FILETYPES_SUPPORTED =  [filetype.strip() for filetype in config.get('CameraConfig', 'MEDIA_FILETYPES_SUPPORTED').split(',')]
 
 def download_and_delete_file(camera, path, target_directory):
     folder, name = os.path.split(path)
