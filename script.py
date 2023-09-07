@@ -53,21 +53,10 @@ def get_target_directories(camera, regex=MEDIA_DIRS_ON_CAMERA_REGEX):
 
 def download_file(camera, path, target_directory):
     dir, name = os.path.split(path)
-    
-    # Step 1: Download the file to a temporary location
-    temp_path = os.path.join(target_directory, "temp_" + name)
-    
-    camera_file = camera.file_get(dir, name, gp.GP_FILE_TYPE_NORMAL)
-    camera_file.save(temp_path)
-    camera_file.clean()
 
-    # Step 2: Compute its hash
-    hash = file_hash(temp_path)
-
-    # Step 3: Decide based on hash
-    if hash in downloaded_files:
+    # Decide based on path 
+    if path in downloaded_files:
         print(f"Skipping already downloaded file: {name}")
-        os.remove(temp_path)
         return
 
     # Fetch the file info which contains the timestamp
@@ -84,24 +73,24 @@ def download_file(camera, path, target_directory):
     output_path = os.path.join(target_directory, unique_name)
     print(f"Downloading {path} to {output_path}")
 
-    os.rename(temp_path, output_path)
+    camera_file = camera.file_get(dir, name, gp.GP_FILE_TYPE_NORMAL)
+    camera_file.save(output_path)
     os.chmod(output_path, 0o666)
 
-    # After successful download, add file hash to the set
-    downloaded_files.add(hash)
+    # After successful download, add file path to the set
+    downloaded_files.add(path)
     persist_downloaded_files()
 
 
 
 def delete_file_from_camera(camera, path):
     dir, name = os.path.split(path)
-    hash = file_hash(path)
 
     # Delete the file
     camera.file_delete(dir, name)
 
-    # Remove the file name or hash from the set
-    downloaded_files.discard(hash) 
+    # Remove the file name from the set
+    downloaded_files.discard(path) 
     persist_downloaded_files()
 
 
@@ -194,9 +183,7 @@ def tether_and_monitor_photos(target_directory):
                 # Use timeout for 3000ms or 3s. Adjust as needed.
                 event_type, event_data = camera.wait_for_event(3000)
                 if event_type == gp.GP_EVENT_FILE_ADDED:
-                    download_file(camera, event_data.folder + event_data.name, target_directory)
-                    # Double-check for any remaining media files
-                    download_all_existing_files(camera, target_directory)
+                    download_file(camera, os.path.join(event_data.folder, event_data.name), target_directory)
                     # Delete old files
                     delete_old_files_from_camera(camera)
         except KeyboardInterrupt:
