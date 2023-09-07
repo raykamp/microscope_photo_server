@@ -167,10 +167,15 @@ def tether_and_monitor_photos(target_directory):
             camera.init()
             # get configuration tree
             camera_config = camera.get_config()
-            # find the capture target config item
+            # Configure the photo capture target to be the SD card
             capture_target = camera_config.get_child_by_name('capturetarget')
             value = capture_target.get_choice(1) # captures are saved to SD card
             capture_target.set_value(value) 
+            # Configure video capture target to be the SD card
+            movie_record_target = camera_config.get_child_by_name('movierecordtarget')
+            value = movie_record_target.get_choice(0) # captures are saved to SD card
+            movie_record_target.set_value(value) 
+            # Set the configuration
             camera.set_config(camera_config)
 
             # Download all existing files upon first connection
